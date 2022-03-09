@@ -1,0 +1,3 @@
+[submodule "vendor/git/corpora.git"]
+	path = vendor/git/corpora.git
+	url = https://github.com/dariusk/corpora.git
