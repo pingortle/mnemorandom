@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "pathname"
 require_relative "mnemorandom/version"
 
 module Mnemorandom
@@ -24,6 +25,56 @@ module Mnemorandom
   def self.load_smart_corpus(*args)
     load_raw_corpus(*args).values.find { |value| value.is_a?(Array) }.tap do |list|
       raise Error.new("Unsupported corpus schema detected") unless list.first.respond_to?(:to_str)
+    end
+  end
+
+  class Word < Struct.new(:raw)
+    def name
+      raw
+    end
+
+    def <=>(other)
+      name <=> other.name
+    end
+
+    class << self
+      def load
+        raise "not implemented"
+      end
+
+      attr_writer :words
+      def words
+        load
+        @words
+      end
+
+      def where(max: nil)
+        words.filter { |word| max.nil? ? true : word.name.length <= max }
+      end
+    end
+  end
+
+  module Colors
+    class Crayola < Word
+      def name
+        @name ||= raw.fetch("color")
+      end
+
+      class << self
+        def load
+          self.words ||= Mnemorandom.load_raw_corpus(:colors, :crayola)
+            .fetch("colors")
+            .map(&method(:new))
+        end
+      end
+    end
+  end
+
+  module Humans
+    class TolkienCharacterName < Word
+      def self.load
+        self.words = Mnemorandom.load
+      end
     end
   end
 end

@@ -4,6 +4,33 @@ require "test_helper"
 require "set"
 
 class MnemorandomTest < Minitest::Test
+  class ColorsModuleCrayolaTest < self
+    Crayola = Mnemorandom::Colors::Crayola
+
+    def setup
+      @raw_almond = {"color" => "Almond", "hex" => "#EFDECD"}
+      @almond = Crayola.new(@raw_almond)
+    end
+
+    def test_word_has_a_name
+      assert_equal "Almond", @almond.name
+    end
+
+    def test_can_filter_by_criteria
+      assert_predicate Crayola.where(max: 5), :any?
+      assert Crayola.where(max: 5).all? { |object| object.name.length <= 5 }
+    end
+
+    def test_can_sort_words
+      words = Crayola.words
+      assert_equal words.map(&:name).sort, words.sort.map(&:name)
+    end
+
+    def test_loads_words
+      assert_operator 0, :<, Crayola.words.length
+    end
+  end
+
   def test_load_smart_corpus_raises_on_non_string_list
     assert_raises(Mnemorandom::Error) do
       Mnemorandom.load_smart_corpus(:animals, :birds_antarctica)
